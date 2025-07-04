@@ -1,3 +1,3 @@
-### Project for spring-boot course
+# Project for spring-boot course
 
-# mall project for JAVA
+### mall project for JAVA
