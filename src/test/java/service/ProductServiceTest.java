@@ -16,8 +16,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
@@ -127,6 +126,14 @@ public class ProductServiceTest {
     }
 
     @Test
+    void createProduct_withNull(){
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> productService.createProduct(null));
+
+        assertEquals("Product can not be null", exception.getMessage());
+        verify(productRepository, never()).save(any());
+    }
+
+    @Test
     void updateProduct() {
         Long productId = 1L;
         Product existingProduct = new Product();
@@ -157,6 +164,18 @@ public class ProductServiceTest {
         verify(productRepository).findById(productId);
         verify(productRepository).save(any(Product.class));
 
+    }
+
+    @Test
+    void updateProduct_WhenProductNotExists_ShouldThrowException() {
+        Long productId = 1L;
+        when(productRepository.findById(productId)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> productService.updateProduct(productId, testProduct));
+
+        assertEquals("Product not found", exception.getMessage());
+        verify(productRepository).findById(productId);
+        verify(productRepository, never()).save(any());
     }
 
     @Test

@@ -31,6 +31,9 @@ public class ProductService implements IProductService{
 
     @Override
     public Product createProduct(Product product) {
+        if(product == null){
+            throw new RuntimeException("Product can not be null");
+        }
         return productRepository.save(product);
     }
 
@@ -42,7 +45,7 @@ public class ProductService implements IProductService{
             product.setProductId(productId);
             return productRepository.save(product);
         }
-        return null;
+        throw new RuntimeException("Product not found");
     }
 
     @Override
