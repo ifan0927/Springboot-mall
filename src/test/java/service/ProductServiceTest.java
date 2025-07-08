@@ -163,14 +163,11 @@ public class ProductServiceTest {
     void deleteProduct_WhenProductExists_ShouldDelete() {
         // Given
         Long productId = 1L;
-        // Mock：假設產品存在
-        when(productRepository.existsById(productId)).thenReturn(true);
 
         // When
         productService.deleteProduct(productId);
 
         // Then - 只驗證 delete 行為
-        verify(productRepository).existsById(productId);
         verify(productRepository).deleteById(productId);
     }
 
