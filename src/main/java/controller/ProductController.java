@@ -25,6 +25,11 @@ public class ProductController {
         return ResponseEntity.ofNullable();
     }
 
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<Product>> getProductListByCategory(@PathVariable String category) {
+        return ResponseEntity.ofNullable();
+    }
+
     @PostMapping("/{productId}")
     public ResponseEntity<Product> createProduct(@PathVariable Long productId,
                                                  @RequestBody Product product) {

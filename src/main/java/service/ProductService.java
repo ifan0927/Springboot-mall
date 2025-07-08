@@ -5,10 +5,6 @@ import model.Product;
 import java.util.List;
 
 public class ProductService implements IProductService{
-    @Override
-    public List<Product> listAll() {
-        return List.of();
-    }
 
     @Override
     public Product getById(Long id) {
@@ -16,8 +12,13 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public Product getList() {
-        return null;
+    public List<Product> getList() {
+        return List.of();
+    }
+
+    @Override
+    public List<Product> getListByCategory(String category) {
+        return List.of();
     }
 
     @Override
