@@ -17,33 +17,33 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<Product>> getProductList() {
-        return ResponseEntity.ofNullable();
+        return null;
     }
 
     @GetMapping("/{productId}")
     public ResponseEntity<Product> getProductById(@PathVariable Long productId) {
-        return ResponseEntity.ofNullable();
+        return null;
     }
 
     @GetMapping("/category/{category}")
     public ResponseEntity<List<Product>> getProductListByCategory(@PathVariable String category) {
-        return ResponseEntity.ofNullable();
+        return null;
     }
 
     @PostMapping("/{productId}")
-    public ResponseEntity<Product> createProduct(@PathVariable Long productId,
-                                                 @RequestBody Product product) {
-        return ResponseEntity.ofNullable();
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        return null;
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@RequestBody Product product) {
-        return ResponseEntity.ofNullable();
+    public ResponseEntity<Product> updateProduct(@PathVariable Long productId,
+                                                 @RequestBody Product product) {
+        return null;
     }
 
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
-        return ResponseEntity.ofNullable();
+        return null;
     }
 
 }

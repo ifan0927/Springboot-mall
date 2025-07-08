@@ -3,12 +3,13 @@ package service;
 import model.Product;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ProductService implements IProductService{
 
     @Override
-    public Product getById(Long id) {
-        return null;
+    public Optional<Product> getById(Long id) {
+        return Optional.empty();
     }
 
     @Override
@@ -27,7 +28,7 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public Product updateProduct(Product product) {
+    public Product updateProduct(Long productId, Product product) {
         return null;
     }
 
