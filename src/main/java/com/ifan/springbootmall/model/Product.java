@@ -17,6 +17,7 @@ public class Product {
     @Column(name = "product_name", nullable = false)
     private String productName;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
     private String category;
 
@@ -55,6 +56,7 @@ public class Product {
     public void setProductName(String productName) {
         this.productName = productName;
     }
+
 
     public String getCategory() {
         return category;

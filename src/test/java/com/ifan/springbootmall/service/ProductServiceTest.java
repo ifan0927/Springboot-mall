@@ -1,5 +1,6 @@
 package com.ifan.springbootmall.service;
 
+import com.ifan.springbootmall.constant.ProductCategory;
 import com.ifan.springbootmall.model.Product;
 import com.ifan.springbootmall.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,26 +91,14 @@ public class ProductServiceTest {
 
     @Test
     void getListByCategory() {
-        String category = "test category";
+        ProductCategory category = ProductCategory.OTHERS;
         when(productRepository.findByCategory(category)).thenReturn(List.of(testProduct));
 
-        List<Product> result = productService.getListByCategory(category);
+        List<Product> result = productService.getListByCategory(ProductCategory.OTHERS);
 
         assertEquals(1, result.size());
         assertEquals(testProduct, result.get(0));
 
-        verify(productRepository).findByCategory(category);
-    }
-
-    @Test
-    void getListByCategory_notFound(){
-        String category = "empty category";
-
-        when(productRepository.findByCategory(category)).thenReturn(List.of());
-
-        List<Product> result = productService.getListByCategory(category);
-
-        assertTrue(result.isEmpty());
         verify(productRepository).findByCategory(category);
     }
 

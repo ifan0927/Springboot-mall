@@ -1,5 +1,6 @@
 package com.ifan.springbootmall.controller;
 
+import com.ifan.springbootmall.constant.ProductCategory;
 import com.ifan.springbootmall.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,8 @@ public class ProductController {
 
     @GetMapping("/category/{category}")
     public ResponseEntity<List<Product>> getProductListByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(productService.getListByCategory(category));
+        ProductCategory productCategory = ProductCategory.valueOf(category.toUpperCase());
+        return ResponseEntity.ok(productService.getListByCategory(productCategory));
     }
 
     @PostMapping

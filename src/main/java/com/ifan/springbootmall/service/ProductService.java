@@ -1,5 +1,6 @@
 package com.ifan.springbootmall.service;
 
+import com.ifan.springbootmall.constant.ProductCategory;
 import com.ifan.springbootmall.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,8 +26,8 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public List<Product> getListByCategory(String category) {
-        return productRepository.findByCategory( category);
+    public List<Product> getListByCategory(ProductCategory category) {
+        return productRepository.findByCategory(category);
     }
 
     @Override

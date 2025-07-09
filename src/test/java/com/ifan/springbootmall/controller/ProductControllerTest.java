@@ -1,6 +1,7 @@
 package com.ifan.springbootmall.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ifan.springbootmall.constant.ProductCategory;
 import com.ifan.springbootmall.model.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when; 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,7 +49,7 @@ class ProductControllerTest {
     void setUp(){
         testedProduct = new Product();
         testedProduct.setProductName("test product");
-        testedProduct.setCategory("test category");
+        testedProduct.setCategory("BOOKS");
         testedProduct.setImageUrl("test image url");
         testedProduct.setPrice(100);
         testedProduct.setStock(10);
@@ -57,7 +58,7 @@ class ProductControllerTest {
         savedProduct = new Product();
         savedProduct.setProductId(1L);
         savedProduct.setProductName("test product");
-        savedProduct.setCategory("test category");
+        savedProduct.setCategory("BOOKS");
         savedProduct.setImageUrl("test image url");
         savedProduct.setPrice(100);
         savedProduct.setStock(10);
@@ -92,7 +93,7 @@ class ProductControllerTest {
 
     @Test
     void getProductListByCategory() throws Exception{
-        String category = "test category";
+        ProductCategory category = ProductCategory.BOOKS;
         when(productService.getListByCategory(category)).thenReturn(List.of(savedProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/api/v1/products/category/test category");
