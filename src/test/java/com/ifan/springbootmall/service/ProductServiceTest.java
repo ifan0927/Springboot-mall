@@ -29,6 +29,8 @@ public class ProductServiceTest {
 
     private Product testProduct;
     private Product savedProduct;
+    private Product lessThanProduct;
+    private Product differentProduct;
 
     @BeforeEach
     void setUp() {
@@ -48,6 +50,24 @@ public class ProductServiceTest {
         savedProduct.setPrice( 100);
         savedProduct.setStock( 10);
         savedProduct.setDescription( "test description");
+
+        lessThanProduct = new Product();
+        lessThanProduct.setProductId( 1L);
+        lessThanProduct.setProductName( "test product");
+        lessThanProduct.setCategory(ProductCategory.BOOKS);
+        lessThanProduct.setImageUrl( "test image url");
+        lessThanProduct.setPrice( 100);
+        lessThanProduct.setStock( 5);
+        lessThanProduct.setDescription( "test description");
+
+        differentProduct = new Product();
+        differentProduct.setProductId( 1L);
+        differentProduct.setProductName( "test product");
+        differentProduct.setCategory(ProductCategory.FOODS);
+        differentProduct.setImageUrl( "test image url");
+        differentProduct.setPrice( 100);
+        differentProduct.setStock( 10);
+        differentProduct.setDescription( "test description");
     }
 
     @Test
@@ -81,7 +101,7 @@ public class ProductServiceTest {
     void getList() {
         when(productRepository.findAll()).thenReturn(List.of(testProduct));
 
-        List<Product> result = productService.getList();
+        List<Product> result = productService.getList(Optional.empty(), Optional.empty());
         assertEquals(1, result.size());
         assertEquals(testProduct.getProductName(), result.get(0).getProductName());
         assertEquals(testProduct.getProductId(), result.get(0).getProductId());
@@ -95,12 +115,43 @@ public class ProductServiceTest {
         when(productRepository.findByCategory(category)).thenReturn(List.of(testProduct));
 
         List<Product> result;
-        result = productService.getListByCategory(ProductCategory.BOOKS);
+        result = productService.getList(Optional.of(ProductCategory.BOOKS), Optional.empty());
 
         assertEquals(1, result.size());
         assertEquals(testProduct, result.get(0));
 
         verify(productRepository).findByCategory(category);
+    }
+
+    @Test
+    void getListByStockMoreThan(){
+        int stock = 10;
+
+        when(productRepository.findAll()).thenReturn(List.of(savedProduct, lessThanProduct));
+
+        List<Product> result;
+        result = productService.getList(Optional.empty(), Optional.of(stock) );
+
+        assertEquals(1, result.size());
+        assertEquals(savedProduct, result.get(0));
+        assertTrue(result.get(0).getStock() >= stock);
+        verify(productRepository).findAll();
+    }
+
+    @Test
+    void getListByStockMoreThanAndCategory(){
+        int stock = 10;
+        lessThanProduct.setCategory(ProductCategory.FOODS);
+        when(productRepository.findByCategory(ProductCategory.FOODS)).thenReturn(List.of(lessThanProduct, differentProduct));
+
+        List<Product> result;
+        result = productService.getList(Optional.of(ProductCategory.FOODS), Optional.of(stock));
+
+        assertEquals(1, result.size());
+        assertEquals(differentProduct, result.get(0));
+        assertEquals(ProductCategory.FOODS, result.get(0).getCategory());
+        assertTrue(result.get(0).getStock() >= stock);
+        verify(productRepository).findByCategory(ProductCategory.FOODS);
     }
 
     @Test
@@ -134,7 +185,8 @@ public class ProductServiceTest {
         updateData.setProductName("updatedProduct name");
         updateData.setPrice(1000);
 
-        Product expectedResult = new Product();
+        Product expectedResult;
+        expectedResult = new Product();
         expectedResult.setProductId(productId);
         expectedResult.setProductName("updatedProduct name");
         expectedResult.setPrice(1000);

@@ -42,8 +42,11 @@ class ProductControllerTest {
 
     @MockitoBean
     private ProductService productService;
+
     private Product testedProduct;
     private Product savedProduct;
+    private Product lessThanProduct;
+    private Product differentProduct;
 
     @BeforeEach
     void setUp(){
@@ -63,18 +66,36 @@ class ProductControllerTest {
         savedProduct.setPrice(100);
         savedProduct.setStock(10);
         savedProduct.setDescription("test description");
+
+        lessThanProduct = new Product();
+        lessThanProduct.setProductId( 1L);
+        lessThanProduct.setProductName( "test product");
+        lessThanProduct.setCategory(ProductCategory.BOOKS);
+        lessThanProduct.setImageUrl( "test image url");
+        lessThanProduct.setPrice( 100);
+        lessThanProduct.setStock( 5);
+        lessThanProduct.setDescription( "test description");
+
+        differentProduct = new Product();
+        differentProduct.setProductId( 1L);
+        differentProduct.setProductName( "test product");
+        differentProduct.setCategory(ProductCategory.FOODS);
+        differentProduct.setImageUrl( "test image url");
+        differentProduct.setPrice( 100);
+        differentProduct.setStock( 10);
+        differentProduct.setDescription( "test description");
     }
 
     @Test
     void getProductList() throws Exception {
-        when(productService.getList()).thenReturn(List.of(testedProduct));
+        when(productService.getList(Optional.empty(),Optional.empty())).thenReturn(List.of(testedProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/api/v1/products");
 
         mockMvc.perform(requestBuilder)
                 .andExpect(status().is(200))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].productName").value("test product"));
-        verify(productService).getList();
+        verify(productService).getList(Optional.empty(),Optional.empty());
     }
 
     @Test
@@ -94,16 +115,41 @@ class ProductControllerTest {
     @Test
     void getProductListByCategory() throws Exception{
         ProductCategory category = ProductCategory.BOOKS;
-        when(productService.getListByCategory(category)).thenReturn(List.of(savedProduct));
+        when(productService.getList(Optional.of(category), Optional.empty())).thenReturn(List.of(savedProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/api/v1/products/category/BOOKS");
+                .get("/api/v1/products/category")
+                .param("category", category.name());
 
         mockMvc.perform(requestBuilder)
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$[0].productName", equalTo("test product")))
                 .andExpect(jsonPath("$[0].productId", equalTo(1)));
 
-        verify(productService).getListByCategory(category);
+        verify(productService).getList(Optional.of(category), Optional.empty());
+    }
+
+    @Test void getProductListByCategory_WhenCategoryNotExists_ShouldThrowException() throws Exception {
+        ProductCategory category = ProductCategory.FOODS;
+        when(productService.getList(Optional.of(category),Optional.empty())).thenReturn(List.of(savedProduct));
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/api/v1/products/category")
+                .param("category", category.name());
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test void getProductListByStockMoreThan() throws Exception {
+        int stock = 10;
+        when(productService.getList(Optional.empty(), Optional.of(stock))).thenReturn(List.of(savedProduct, lessThanProduct));
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/api/v1/products/stock")
+                .param("stock", String.valueOf(stock));
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$[0].productName", equalTo(savedProduct.getProductName())));
+        verify(productService).getList(Optional.empty(),Optional.of(stock));
     }
 
     @Test

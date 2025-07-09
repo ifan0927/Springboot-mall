@@ -21,13 +21,8 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public List<Product> getList() {
+    public List<Product> getList(Optional<ProductCategory> category, Optional<Integer> stock) {
         return productRepository.findAll();
-    }
-
-    @Override
-    public List<Product> getListByCategory(ProductCategory category) {
-        return productRepository.findByCategory(category);
     }
 
     @Override
@@ -52,6 +47,6 @@ public class ProductService implements IProductService{
     @Override
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
-
     }
+
 }
