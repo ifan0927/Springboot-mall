@@ -1,21 +1,20 @@
-package service;
+package com.ifan.springbootmall.service;
 
-import model.Product;
+import com.ifan.springbootmall.model.Product;
+import com.ifan.springbootmall.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import repository.ProductRepository;
+import com.ifan.springbootmall.repository.ProductRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -159,8 +158,8 @@ public class ProductServiceTest {
         // When - 執行更新
         Product result = productService.updateProduct(productId, updateData);
 
-        assertEquals("updatedProduct name", expectedResult.getProductName());
-        assertEquals(1000, expectedResult.getPrice());
+        assertEquals("updatedProduct name", result.getProductName());
+        assertEquals(1000, result.getPrice());
         verify(productRepository).findById(productId);
         verify(productRepository).save(any(Product.class));
 

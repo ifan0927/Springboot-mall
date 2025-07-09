@@ -1,4 +1,4 @@
-package model;
+package com.ifan.springbootmall.model;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;

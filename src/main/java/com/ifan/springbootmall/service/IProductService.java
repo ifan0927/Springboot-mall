@@ -1,6 +1,6 @@
-package service;
+package com.ifan.springbootmall.service;
 
-import model.Product;
+import com.ifan.springbootmall.model.Product;
 
 import java.util.List;
 import java.util.Optional;

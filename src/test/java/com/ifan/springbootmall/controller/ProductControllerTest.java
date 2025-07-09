@@ -1,29 +1,30 @@
-package controller;
+package com.ifan.springbootmall.controller;
 
-import model.Product;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ifan.springbootmall.model.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import service.ProductService;
+import com.ifan.springbootmall.service.ProductService;
 
 import java.util.List;
 import java.util.Optional;
 
-import static net.bytebuddy.matcher.ElementMatchers.is;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.when; 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,7 +36,10 @@ class ProductControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @Autowired
+    public ObjectMapper objectMapper;
+
+    @MockitoBean
     private ProductService productService;
     private Product testedProduct;
     private Product savedProduct;
@@ -75,7 +79,7 @@ class ProductControllerTest {
     @Test
     void getProductById() throws Exception{
         Long productId = 1L;
-        when(productService.getById(productId)).thenReturn(Optional.of(testedProduct));
+        when(productService.getById(productId)).thenReturn(Optional.of(savedProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/api/v1/products/1");
 
@@ -89,7 +93,7 @@ class ProductControllerTest {
     @Test
     void getProductListByCategory() throws Exception{
         String category = "test category";
-        when(productService.getListByCategory(category)).thenReturn(List.of(testedProduct));
+        when(productService.getListByCategory(category)).thenReturn(List.of(savedProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/api/v1/products/category/test category");
 
@@ -97,17 +101,49 @@ class ProductControllerTest {
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$[0].productName", equalTo("test product")))
                 .andExpect(jsonPath("$[0].productId", equalTo(1)));
+
+        verify(productService).getListByCategory(category);
     }
 
     @Test
-    void createProduct() throws Exception{
+    void createProduct() throws Exception {
+        when(productService.createProduct(any(Product.class))).thenReturn(savedProduct);
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testedProduct));
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.productId").value(1L));
+
+        verify(productService).createProduct(any(Product.class));
     }
 
     @Test
-    void updateProduct() {
+    void updateProduct() throws Exception {
+        when(productService.updateProduct(any(Long.class), any(Product.class))).thenReturn(savedProduct);
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .put("/api/v1/products/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(savedProduct));
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("productId").value(1L))
+                .andExpect(jsonPath("productName").value(savedProduct.getProductName()));
+        verify(productService).updateProduct(any(Long.class), any(Product.class));
+
     }
 
     @Test
-    void deleteProduct() {
+    void deleteProduct() throws Exception {
+        Long productId = 1L;
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .delete("/api/v1/products/1");
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isNoContent());
+
+        verify(productService).deleteProduct(productId);
     }
 }

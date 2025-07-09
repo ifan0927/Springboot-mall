@@ -1,9 +1,9 @@
-package service;
+package com.ifan.springbootmall.service;
 
-import model.Product;
+import com.ifan.springbootmall.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import repository.ProductRepository;
+import com.ifan.springbootmall.repository.ProductRepository;
 
 import java.util.List;
 import java.util.Optional;

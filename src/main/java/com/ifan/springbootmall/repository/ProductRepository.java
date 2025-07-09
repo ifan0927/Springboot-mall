@@ -1,13 +1,12 @@
-package repository;
+package com.ifan.springbootmall.repository;
 
-import model.Product;
-import org.springframework.context.annotation.Bean;
+import com.ifan.springbootmall.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Component
+@Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategory(String category);
 }
