@@ -49,7 +49,7 @@ class ProductControllerTest {
     void setUp(){
         testedProduct = new Product();
         testedProduct.setProductName("test product");
-        testedProduct.setCategory("BOOKS");
+        testedProduct.setCategory(ProductCategory.BOOKS);
         testedProduct.setImageUrl("test image url");
         testedProduct.setPrice(100);
         testedProduct.setStock(10);
@@ -58,7 +58,7 @@ class ProductControllerTest {
         savedProduct = new Product();
         savedProduct.setProductId(1L);
         savedProduct.setProductName("test product");
-        savedProduct.setCategory("BOOKS");
+        savedProduct.setCategory(ProductCategory.BOOKS);
         savedProduct.setImageUrl("test image url");
         savedProduct.setPrice(100);
         savedProduct.setStock(10);
@@ -96,7 +96,7 @@ class ProductControllerTest {
         ProductCategory category = ProductCategory.BOOKS;
         when(productService.getListByCategory(category)).thenReturn(List.of(savedProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/api/v1/products/category/test category");
+                .get("/api/v1/products/category/BOOKS");
 
         mockMvc.perform(requestBuilder)
                 .andExpect(status().is(200))

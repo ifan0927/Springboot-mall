@@ -1,5 +1,6 @@
 package com.ifan.springbootmall.model;
 
+import com.ifan.springbootmall.constant.ProductCategory;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -19,7 +20,7 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
-    private String category;
+    private ProductCategory category;
 
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
@@ -58,11 +59,11 @@ public class Product {
     }
 
 
-    public String getCategory() {
+    public ProductCategory getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(ProductCategory category) {
         this.category = category;
     }
 

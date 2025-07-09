@@ -34,7 +34,7 @@ public class ProductServiceTest {
     void setUp() {
         testProduct = new Product();
         testProduct.setProductName( "test product");
-        testProduct.setCategory( "test category");
+        testProduct.setCategory(ProductCategory.BOOKS);
         testProduct.setImageUrl( "test image url");
         testProduct.setPrice( 100);
         testProduct.setStock( 10);
@@ -43,7 +43,7 @@ public class ProductServiceTest {
         savedProduct = new Product();
         savedProduct.setProductId( 1L);
         savedProduct.setProductName( "test product");
-        savedProduct.setCategory( "test category");
+        savedProduct.setCategory(ProductCategory.BOOKS);
         savedProduct.setImageUrl( "test image url");
         savedProduct.setPrice( 100);
         savedProduct.setStock( 10);
@@ -91,10 +91,11 @@ public class ProductServiceTest {
 
     @Test
     void getListByCategory() {
-        ProductCategory category = ProductCategory.OTHERS;
+        ProductCategory category = ProductCategory.BOOKS;
         when(productRepository.findByCategory(category)).thenReturn(List.of(testProduct));
 
-        List<Product> result = productService.getListByCategory(ProductCategory.OTHERS);
+        List<Product> result;
+        result = productService.getListByCategory(ProductCategory.BOOKS);
 
         assertEquals(1, result.size());
         assertEquals(testProduct, result.get(0));
