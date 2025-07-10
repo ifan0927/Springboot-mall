@@ -9,7 +9,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.ifan.springbootmall.repository.ProductRepository;
+import org.springframework.data.domain.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,8 +31,6 @@ public class ProductServiceTest {
 
     private Product testProduct;
     private Product savedProduct;
-    private Product lessThanProduct;
-    private Product differentProduct;
 
     @BeforeEach
     void setUp() {
@@ -49,28 +50,31 @@ public class ProductServiceTest {
         savedProduct.setPrice( 100);
         savedProduct.setStock( 10);
         savedProduct.setDescription( "test description");
+    }
 
-        lessThanProduct = new Product();
-        lessThanProduct.setProductId( 1L);
-        lessThanProduct.setProductName( "test product");
-        lessThanProduct.setCategory(ProductCategory.BOOKS);
-        lessThanProduct.setImageUrl( "test image url");
-        lessThanProduct.setPrice( 100);
-        lessThanProduct.setStock( 5);
-        lessThanProduct.setDescription( "test description");
+    private List<Product> createTestProducts(int count) {
+        List<Integer> ids = new ArrayList<>();
+        for (int i = 1; i <= count; i++) {
+            ids.add(i);
+        }
 
-        differentProduct = new Product();
-        differentProduct.setProductId( 1L);
-        differentProduct.setProductName( "test product");
-        differentProduct.setCategory(ProductCategory.FOODS);
-        differentProduct.setImageUrl( "test image url");
-        differentProduct.setPrice( 100);
-        differentProduct.setStock( 10);
-        differentProduct.setDescription( "test description");
+        Collections.shuffle(ids);
+
+        List<Product> products = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            Product product = new Product();
+            product.setProductId(ids.get(i).longValue());
+            product.setProductName("Product " + ids.get(i));
+            product.setPrice(i * 100);
+            product.setStock(i * 5);
+            product.setCategory(ProductCategory.ELECTRONICS);
+            products.add(product);
+        }
+        return products;
     }
 
     @Test
-    void getById() {
+    void getById_WhenProductExists_ShouldReturnProduct() {
         //GIVEN 階段 設定Mock
         Long productId = 1L;
         when(productRepository.findById(productId)).thenReturn(Optional.of(testProduct));
@@ -86,7 +90,7 @@ public class ProductServiceTest {
     }
 
     @Test
-    void getById_notFound() {
+    void getById_WhenProductNotExists_ShouldReturnEmptyOptional() {
         Long productId = 1L;
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
@@ -97,65 +101,62 @@ public class ProductServiceTest {
     }
 
     @Test
-    void getList() {
-        when(productRepository.findAll()).thenReturn(List.of(testProduct));
+    void getList_WithPagination_ShouldReturnPagedResult(){
+        Pageable pageable = PageRequest.of(0,10);
+        List<Product> products = createTestProducts(30);
+        Page<Product> mockPage = new PageImpl<>(products, pageable, 30);
 
-        List<Product> result = productService.getList(null, null);
-        assertEquals(1, result.size());
-        assertEquals(testProduct.getProductName(), result.get(0).getProductName());
-        assertEquals(testProduct.getProductId(), result.get(0).getProductId());
+        when(productRepository.findAll(pageable)).thenReturn(mockPage);
 
-        verify(productRepository).findAll();
+        Page<Product> result = productService.getList(null, null, pageable);
+
+        assertEquals(mockPage, result);
+        verify(productRepository).findAll(pageable);
     }
 
     @Test
-    void getListByCategory() {
-        ProductCategory category = ProductCategory.BOOKS;
-        when(productRepository.findByCategory(category)).thenReturn(List.of(testProduct));
+    void getList_WithCategory_ShouldReturnPagedResult(){
+        Pageable pageable = PageRequest.of(0,10);
+        List<Product> products = createTestProducts(20);
+        Page<Product> mockPage = new PageImpl<>(products, pageable, 20);
+        when(productRepository.findByCategory(ProductCategory.ELECTRONICS, pageable)).thenReturn(mockPage);
 
-        List<Product> result;
-        result = productService.getList(category, null);
+        Page<Product> result = productService.getList(ProductCategory.ELECTRONICS, null, pageable);
 
-        assertEquals(1, result.size());
-        assertEquals(testProduct, result.get(0));
-
-        verify(productRepository).findByCategory(category);
+        assertEquals(mockPage, result);
+        verify(productRepository).findByCategory(ProductCategory.ELECTRONICS, pageable);
     }
 
     @Test
-    void getListByStockMoreThan(){
-        int stock = 10;
+    void getList_WithStockMoreThan_ShouldReturnPagedResult(){
+        Pageable pageable = PageRequest.of(0,10);
+        List<Product> products = createTestProducts(20);
+        Page<Product> mockPage = new PageImpl<>(products, pageable, 20);
+        when(productRepository.findByStockGreaterThan(5, pageable)).thenReturn(mockPage);
 
-        when(productRepository.findByStockGreaterThan(stock)).thenReturn(List.of(savedProduct));
+        Page<Product> result = productService.getList(null, 5, pageable);
 
-        List<Product> result;
-        result = productService.getList(null, stock );
-
-        assertEquals(1, result.size());
-        assertEquals(savedProduct, result.get(0));
-        assertTrue(result.get(0).getStock() >= stock);
-        verify(productRepository).findByStockGreaterThan(stock);
+        assertEquals(mockPage, result);
+        verify(productRepository).findByStockGreaterThan(5, pageable);
     }
 
     @Test
-    void getListByStockMoreThanAndCategory(){
-        int stock = 10;
-        ProductCategory category = ProductCategory.FOODS;
-        lessThanProduct.setCategory(ProductCategory.FOODS);
-        when(productRepository.findByCategoryAndStockGreaterThan(category,stock)).thenReturn(List.of(differentProduct));
+    void getList_WithCategoryAndStockMoreThan_ShouldReturnPagedResult(){
+        Pageable pageable = PageRequest.of(0,10);
+        List<Product> products = createTestProducts(20);
+        Page<Product> mockPage = new PageImpl<>(products, pageable, 20);
+        when(productRepository.findByCategoryAndStockGreaterThan(ProductCategory.ELECTRONICS, 5, pageable)).thenReturn(mockPage);
 
-        List<Product> result;
-        result = productService.getList(category, stock);
+        Page<Product> result = productService.getList(ProductCategory.ELECTRONICS, 5, pageable);
 
-        assertEquals(1, result.size());
-        assertEquals(differentProduct, result.get(0));
-        assertEquals(ProductCategory.FOODS, result.get(0).getCategory());
-        assertTrue(result.get(0).getStock() >= stock);
-        verify(productRepository).findByCategoryAndStockGreaterThan(category, stock);
+        assertEquals(mockPage, result);
+        verify(productRepository).findByCategoryAndStockGreaterThan(ProductCategory.ELECTRONICS, 5, pageable);
     }
 
+
+
     @Test
-    void createProduct() {
+    void createProduct_WhenProductNotExists_ShouldReturnSavedProduct() {
         Product product = savedProduct;
         when(productRepository.save(product)).thenReturn(savedProduct);
 
@@ -166,7 +167,7 @@ public class ProductServiceTest {
     }
 
     @Test
-    void createProduct_withNull(){
+    void createProduct_withNull_WhenProductNotExists_ShouldThrowException() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> productService.createProduct(null));
 
         assertEquals("Product can not be null", exception.getMessage());
@@ -174,7 +175,7 @@ public class ProductServiceTest {
     }
 
     @Test
-    void updateProduct() {
+    void updateProduct_WhenProductExistedAndIsUpdated_ShouldReturnUpdatedProduct() {
         Long productId = 1L;
         Product existingProduct = new Product();
         existingProduct.setProductId(productId);

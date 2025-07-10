@@ -2,14 +2,26 @@ package com.ifan.springbootmall.repository;
 
 import com.ifan.springbootmall.constant.ProductCategory;
 import com.ifan.springbootmall.model.Product;
+import org.antlr.v4.runtime.misc.NotNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    List<Product> findByCategory(ProductCategory category);
-    List<Product> findByStockGreaterThan(Integer stock);
-    List<Product> findByCategoryAndStockGreaterThan(ProductCategory category, Integer stock);
+    @NonNull
+    Page<Product> findAll(@NonNull Pageable pageable);
+
+    @NonNull
+    Page<Product> findByCategory(@NonNull ProductCategory category, @NonNull Pageable pageable);
+
+    @NonNull
+    Page<Product> findByStockGreaterThan(@NonNull Integer stock, @NonNull Pageable pageable);
+
+    @NonNull
+    Page<Product> findByCategoryAndStockGreaterThan(@NonNull ProductCategory category, @NonNull Integer stock,@NonNull Pageable pageable);
  }

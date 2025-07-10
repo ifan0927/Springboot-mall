@@ -3,6 +3,8 @@ package com.ifan.springbootmall.service;
 import com.ifan.springbootmall.constant.ProductCategory;
 import com.ifan.springbootmall.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import com.ifan.springbootmall.repository.ProductRepository;
 
@@ -21,16 +23,16 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public List<Product> getList(ProductCategory category, Integer stock) {
+    public Page<Product> getList(ProductCategory category, Integer stock, Pageable pageable) {
         if (category == null && stock == null ){
-            return productRepository.findAll();
+            return productRepository.findAll(pageable);
         }
         if (category != null && stock != null){
-            return productRepository.findByCategoryAndStockGreaterThan(category, stock);
+            return productRepository.findByCategoryAndStockGreaterThan(category, stock, pageable);
         } else if (category != null) {
-            return productRepository.findByCategory(category);
+            return productRepository.findByCategory(category, pageable);
         } else {
-            return productRepository.findByStockGreaterThan(stock);
+            return productRepository.findByStockGreaterThan(stock, pageable);
         }
     }
 
