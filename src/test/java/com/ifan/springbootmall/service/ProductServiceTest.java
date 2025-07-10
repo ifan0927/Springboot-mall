@@ -2,7 +2,6 @@ package com.ifan.springbootmall.service;
 
 import com.ifan.springbootmall.constant.ProductCategory;
 import com.ifan.springbootmall.model.Product;
-import com.ifan.springbootmall.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -101,7 +100,7 @@ public class ProductServiceTest {
     void getList() {
         when(productRepository.findAll()).thenReturn(List.of(testProduct));
 
-        List<Product> result = productService.getList(Optional.empty(), Optional.empty());
+        List<Product> result = productService.getList(null, null);
         assertEquals(1, result.size());
         assertEquals(testProduct.getProductName(), result.get(0).getProductName());
         assertEquals(testProduct.getProductId(), result.get(0).getProductId());
@@ -115,7 +114,7 @@ public class ProductServiceTest {
         when(productRepository.findByCategory(category)).thenReturn(List.of(testProduct));
 
         List<Product> result;
-        result = productService.getList(Optional.of(ProductCategory.BOOKS), Optional.empty());
+        result = productService.getList(category, null);
 
         assertEquals(1, result.size());
         assertEquals(testProduct, result.get(0));
@@ -127,31 +126,32 @@ public class ProductServiceTest {
     void getListByStockMoreThan(){
         int stock = 10;
 
-        when(productRepository.findAll()).thenReturn(List.of(savedProduct, lessThanProduct));
+        when(productRepository.findByStockGreaterThan(stock)).thenReturn(List.of(savedProduct));
 
         List<Product> result;
-        result = productService.getList(Optional.empty(), Optional.of(stock) );
+        result = productService.getList(null, stock );
 
         assertEquals(1, result.size());
         assertEquals(savedProduct, result.get(0));
         assertTrue(result.get(0).getStock() >= stock);
-        verify(productRepository).findAll();
+        verify(productRepository).findByStockGreaterThan(stock);
     }
 
     @Test
     void getListByStockMoreThanAndCategory(){
         int stock = 10;
+        ProductCategory category = ProductCategory.FOODS;
         lessThanProduct.setCategory(ProductCategory.FOODS);
-        when(productRepository.findByCategory(ProductCategory.FOODS)).thenReturn(List.of(lessThanProduct, differentProduct));
+        when(productRepository.findByCategoryAndStockGreaterThan(category,stock)).thenReturn(List.of(differentProduct));
 
         List<Product> result;
-        result = productService.getList(Optional.of(ProductCategory.FOODS), Optional.of(stock));
+        result = productService.getList(category, stock);
 
         assertEquals(1, result.size());
         assertEquals(differentProduct, result.get(0));
         assertEquals(ProductCategory.FOODS, result.get(0).getCategory());
         assertTrue(result.get(0).getStock() >= stock);
-        verify(productRepository).findByCategory(ProductCategory.FOODS);
+        verify(productRepository).findByCategoryAndStockGreaterThan(category, stock);
     }
 
     @Test

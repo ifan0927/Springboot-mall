@@ -24,8 +24,7 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -88,14 +87,14 @@ class ProductControllerTest {
 
     @Test
     void getProductList() throws Exception {
-        when(productService.getList(Optional.empty(),Optional.empty())).thenReturn(List.of(testedProduct));
+        when(productService.getList(null,null)).thenReturn(List.of(testedProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/api/v1/products");
 
         mockMvc.perform(requestBuilder)
                 .andExpect(status().is(200))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[0].productName").value("test product"));
-        verify(productService).getList(Optional.empty(),Optional.empty());
+        verify(productService).getList(null,null);
     }
 
     @Test
@@ -115,9 +114,9 @@ class ProductControllerTest {
     @Test
     void getProductListByCategory() throws Exception{
         ProductCategory category = ProductCategory.BOOKS;
-        when(productService.getList(Optional.of(category), Optional.empty())).thenReturn(List.of(savedProduct));
+        when(productService.getList(category, null)).thenReturn(List.of(savedProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/api/v1/products/category")
+                .get("/api/v1/products")
                 .param("category", category.name());
 
         mockMvc.perform(requestBuilder)
@@ -125,31 +124,59 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$[0].productName", equalTo("test product")))
                 .andExpect(jsonPath("$[0].productId", equalTo(1)));
 
-        verify(productService).getList(Optional.of(category), Optional.empty());
+        verify(productService).getList(category, null);
     }
 
     @Test void getProductListByCategory_WhenCategoryNotExists_ShouldThrowException() throws Exception {
         ProductCategory category = ProductCategory.FOODS;
-        when(productService.getList(Optional.of(category),Optional.empty())).thenReturn(List.of(savedProduct));
+        when(productService.getList(category, null)).thenReturn(List.of(savedProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/api/v1/products/category")
-                .param("category", category.name());
+                .get("/api/v1/products")
+                .param("category", "NotExistsCategory");
 
         mockMvc.perform(requestBuilder)
                 .andExpect(status().is4xxClientError());
+
+        verify(productService, never()).getList(category, null);
     }
 
     @Test void getProductListByStockMoreThan() throws Exception {
         int stock = 10;
-        when(productService.getList(Optional.empty(), Optional.of(stock))).thenReturn(List.of(savedProduct, lessThanProduct));
+        when(productService.getList(null, stock)).thenReturn(List.of(savedProduct, lessThanProduct));
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/api/v1/products/stock")
+                .get("/api/v1/products")
                 .param("stock", String.valueOf(stock));
 
         mockMvc.perform(requestBuilder)
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$[0].productName", equalTo(savedProduct.getProductName())));
-        verify(productService).getList(Optional.empty(),Optional.of(stock));
+        verify(productService).getList(null, stock);
+    }
+
+    @Test void getProductListByStockMoreThan_WhenStockLessThanZero_ShouldThrowException() throws Exception {
+        int stock = -1;
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/api/v1/products")
+                .param("stock", String.valueOf(stock));
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().is4xxClientError());
+        verify(productService,never()).getList(null, stock);
+    }
+
+    @Test void getProductListByStockMoreThanAndCategory() throws Exception {
+        int stock = 10;
+        ProductCategory category = ProductCategory.FOODS;
+        when(productService.getList(category, stock)).thenReturn(List.of(differentProduct));
+        RequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/api/v1/products")
+                .param("stock", String.valueOf(stock))
+                .param("category", category.name());
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("$[0].productName", equalTo(differentProduct.getProductName())));
+        verify(productService).getList(category, stock);
     }
 
     @Test

@@ -21,8 +21,17 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public List<Product> getList(Optional<ProductCategory> category, Optional<Integer> stock) {
-        return productRepository.findAll();
+    public List<Product> getList(ProductCategory category, Integer stock) {
+        if (category == null && stock == null ){
+            return productRepository.findAll();
+        }
+        if (category != null && stock != null){
+            return productRepository.findByCategoryAndStockGreaterThan(category, stock);
+        } else if (category != null) {
+            return productRepository.findByCategory(category);
+        } else {
+            return productRepository.findByStockGreaterThan(stock);
+        }
     }
 
     @Override

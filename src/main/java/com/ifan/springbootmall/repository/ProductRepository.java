@@ -10,5 +10,6 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategory(ProductCategory category);
-
-}
+    List<Product> findByStockGreaterThan(Integer stock);
+    List<Product> findByCategoryAndStockGreaterThan(ProductCategory category, Integer stock);
+ }

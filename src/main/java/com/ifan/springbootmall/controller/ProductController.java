@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.ifan.springbootmall.service.ProductService;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -19,9 +19,20 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getProductList() {
-        List<Product> returnList = productService.getList(Optional.empty(), Optional.empty());
-        return ResponseEntity.ok(returnList);
+    public ResponseEntity<List<Product>> getProductList(@RequestParam(required = false) String  category, @RequestParam(required = false) Integer stock ) {
+        ProductCategory productCategory = null;
+        if (category != null){
+            try{
+                productCategory = ProductCategory.valueOf(category.toUpperCase());
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+        if (stock != null && stock < 0){
+            return ResponseEntity.badRequest().build();
+        }
+        List<Product> productList = productService.getList(productCategory, stock);
+        return ResponseEntity.ok(productList);
     }
 
     @GetMapping("/{productId}")
