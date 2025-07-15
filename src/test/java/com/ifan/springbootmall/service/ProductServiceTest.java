@@ -156,7 +156,7 @@ public class ProductServiceTest {
 
 
     @Test
-    void createProduct_WhenProductNotExists_ShouldReturnSavedProduct() {
+    void createProduct_WhenProductExists_ShouldReturnSavedProduct() {
         Product product = savedProduct;
         when(productRepository.save(product)).thenReturn(savedProduct);
 
@@ -167,7 +167,7 @@ public class ProductServiceTest {
     }
 
     @Test
-    void createProduct_withNull_WhenProductNotExists_ShouldThrowException() {
+    void createProduct_WhenProductNotExists_ShouldThrowException() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> productService.createProduct(null));
 
         assertEquals("Product can not be null", exception.getMessage());
