@@ -59,7 +59,7 @@ class UserServiceTest {
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
 
-        Optional<User> result = userRepository.findById(userId);
+        Optional<User> result = userService.getById(userId);
 
         assertTrue(result.isPresent());
         assertEquals(testUser, result.get());
@@ -72,7 +72,7 @@ class UserServiceTest {
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        Optional<User> result = userRepository.findById(userId);
+        Optional<User> result = userService.getById(userId);
         assertTrue(result.isEmpty());
 
         verify(userRepository).findById(userId);
@@ -83,7 +83,7 @@ class UserServiceTest {
         String email = "<EMAIL>";
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(testUser));
 
-        Optional<User> result = userRepository.findByEmail(email);
+        Optional<User> result = userService.getByEmail(email);
 
         assertTrue(result.isPresent());
         assertEquals(testUser, result.get());
@@ -96,7 +96,7 @@ class UserServiceTest {
         String email = "<EMAIL>";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        Optional<User> result = userRepository.findByEmail(email);
+        Optional<User> result = userService.getByEmail(email);
 
         assertTrue(result.isEmpty());
 
