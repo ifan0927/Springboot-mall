@@ -16,12 +16,9 @@ public interface IUserService {
 
     void deleteUser(Long id);
 
-    boolean login(Long userId, String password);
+    boolean login(String email, String password);
 
-    Long isUserExist(String email);
-
-
-    boolean checkEmailExist(String email);
+    boolean isEmailExist(String email);
 
 
 }

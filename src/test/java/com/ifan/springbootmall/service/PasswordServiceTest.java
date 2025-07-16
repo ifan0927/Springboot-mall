@@ -136,7 +136,7 @@ class PasswordServiceTest {
             passwordHistories.get(i).setCreatedDate(LocalDateTime.now().minusDays(days));
         }
         when(passwordHistoryRepository.findByUserIdOrderByCreatedDateDesc(userId)).thenReturn(passwordHistories);
-        String existingPassword = passwordHistories.get(9).getPwdHash();
+        String existingPassword = passwordHistories.get(1).getPwdHash();
 
         boolean result = passwordService.isPassWordInHistory(userId, existingPassword);
 

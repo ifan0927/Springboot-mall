@@ -3,9 +3,6 @@ package com.ifan.springbootmall.service;
 import com.ifan.springbootmall.model.PasswordHistory;
 import com.ifan.springbootmall.repository.PasswordHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +39,14 @@ public class PasswordService implements IPasswordService{
 
     @Override
     public boolean isPassWordInHistory(Long id, String password) {
+        List<PasswordHistory> passwordHistories = passwordHistoryRepository.findByUserIdOrderByCreatedDateDesc(id) ;
+        if (!passwordHistories.isEmpty()){
+            for (var i =0 ; i < 3 ; i ++){
+                if (password.equals(passwordHistories.get(i).getPwdHash())){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

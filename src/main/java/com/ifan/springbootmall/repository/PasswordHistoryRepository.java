@@ -14,5 +14,4 @@ public interface PasswordHistoryRepository  extends JpaRepository<PasswordHistor
 
     @NonNull
     List<PasswordHistory> findByUserIdOrderByCreatedDateDesc(@NonNull Long userId);
-
 }

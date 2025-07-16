@@ -1,47 +1,104 @@
 package com.ifan.springbootmall.service;
 
+import com.ifan.springbootmall.model.PasswordHistory;
 import com.ifan.springbootmall.model.User;
+import com.ifan.springbootmall.repository.PasswordHistoryRepository;
+import com.ifan.springbootmall.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+@Component
 public class UserService implements IUserService{
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordService passwordService;
+
+    @Autowired
+    private PasswordHistoryRepository passwordHistoryRepository;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     @Override
     public Optional<User> getById(Long id) {
-        return Optional.empty();
+        return userRepository.findById(id);
     }
 
     @Override
     public Optional<User> getByEmail(String email) {
-        return Optional.empty();
+        return userRepository.findByEmail(email);
     }
 
     @Override
     public User createUser(User user) {
-        return null;
+        if (user == null) {
+            throw new RuntimeException("User can not be null");
+        }
+        if (!passwordService.isPasswordValid(user.getPassword())) {
+            throw new RuntimeException("Password not valid");
+        }
+        PasswordHistory passwordHistory;
+        passwordHistory =  new PasswordHistory();
+        String hashedPassword = passwordService.hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
+        passwordHistory.setUserId(user.getUserId());
+        passwordHistory.setPwdHash(hashedPassword);
+        passwordHistoryRepository.save(passwordHistory);
+        return userRepository.save(user);
     }
 
     @Override
     public User updateUser(Long userId, User user) {
-        return null;
+        Optional<User> userUpdate = userRepository.findById(userId);
+
+        if (userUpdate.isPresent()) {
+            user.setUserId(userId);
+            User exisitingUser = userUpdate.get();
+            if (exisitingUser.getPassword().equals(user.getPassword())) {
+                return userRepository.save(user);
+            }
+            if (passwordService.isPasswordValid(user.getPassword())) {
+                String hashedPassword = passwordService.hashPassword(user.getPassword());
+                user.setPassword(hashedPassword);
+                PasswordHistory passwordHistory;
+                passwordHistory =  new PasswordHistory();
+                passwordHistory.setUserId(user.getUserId());
+                passwordHistory.setPwdHash(hashedPassword);
+                passwordHistoryRepository.save(passwordHistory);
+                return userRepository.save(user);
+            }
+            throw new RuntimeException("Password not valid");
+        }
+        throw new RuntimeException("User not found");
     }
 
     @Override
     public void deleteUser(Long id) {
+        userRepository.deleteById(id);
     }
 
     @Override
-    public Long isUserExist(String email) {
-        return null;
+    public boolean isEmailExist(String email) {
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")){
+            throw new RuntimeException("Email not valid");
+        }
+        return userRepository.findByEmail(email).isPresent();
     }
 
     @Override
-    public boolean login(Long userId, String password) {
-        return false;
+    public boolean login(String email, String password) {
+        if (!this.isEmailExist(email)){
+            throw new RuntimeException("Email not found");
+        }
+        Optional<User> user = userRepository.findByEmail(email);
+        User exisitingUser = user.get();
+        return passwordEncoder.matches(password, exisitingUser.getPassword());
     }
 
-    @Override
-    public boolean checkEmailExist(String email) {
-        return false;
-    }
 
 }
