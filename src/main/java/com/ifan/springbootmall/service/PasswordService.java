@@ -4,12 +4,13 @@ import com.ifan.springbootmall.model.PasswordHistory;
 import com.ifan.springbootmall.repository.PasswordHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Component
+@Service
 public class PasswordService implements IPasswordService{
 
     @Autowired

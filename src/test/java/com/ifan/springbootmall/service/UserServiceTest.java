@@ -264,12 +264,35 @@ class UserServiceTest {
     }
 
     @Test
-    void deleteUser() {
+    void deleteUser_WhenUserExists_ShouldDisableUser() {
         Long userId = 1L;
+        User exisitingUser = new User();
+        exisitingUser.setUserId(userId);
+
+        User expectedUser = new User();
+        expectedUser.setUserId(userId);
+        expectedUser.setDeleted(true);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(exisitingUser));
+        when(userRepository.save(any(User.class))).thenReturn(expectedUser);
 
         userService.deleteUser(userId);
 
-        verify(userRepository).deleteById(userId);
+        verify(userRepository).findById(userId);
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void deleteUser_WhenUserNotExists_ShouldThrowException() {
+        Long userId = 1L;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.deleteUser(userId));
+
+        assertEquals("User not found", exception.getMessage());
+        verify(userRepository).findById(userId);
+        verify(userRepository, never()).save(any(User.class));
     }
 
 

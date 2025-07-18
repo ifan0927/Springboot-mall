@@ -6,11 +6,11 @@ import com.ifan.springbootmall.repository.PasswordHistoryRepository;
 import com.ifan.springbootmall.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Component
+@Service
 public class UserService implements IUserService{
 
     @Autowired
@@ -79,7 +79,14 @@ public class UserService implements IUserService{
 
     @Override
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throw new RuntimeException("User not found");
+        }
+        User exisitingUser = user.get();
+        exisitingUser.setDeleted(true);
+        userRepository.save(exisitingUser);
+
     }
 
     @Override
