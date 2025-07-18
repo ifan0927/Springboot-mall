@@ -17,10 +17,10 @@ import static org.mockito.Mockito.when;
 class CustomUserDetailsServiceTest {
 
     @MockitoBean
-    private final UserService userService = new UserService();
+    private  UserService userService ;
 
     @Autowired
-    private final CustomUserDetailsService service = new CustomUserDetailsService();
+    private  CustomUserDetailsService service;
 
     @Test
     void loadUserByUsername_WhenEmailIsValid_AndUserExisitedNotDeleted_ShouldReturnUserPrincipal() {

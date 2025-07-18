@@ -17,24 +17,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     private IUserService userService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // TODO: 1. 使用 userService.getByEmail(email) 找到 User
-        // TODO: 2. 檢查用戶是否存在
-        // TODO: 3. 檢查用戶是否被軟刪除（可選）
-        // TODO: 4. 用 UserPrincipal 包裝 User
-        // TODO: 5. 返回 UserPrincipal（作為 UserDetails）
+    public UserDetails loadUserByUsername(String username) throws RuntimeException {
 
         if (!username.matches("^[A-Za-z0-9+_.-]+@(.+)$")){
-            throw new UsernameNotFoundException("Invalid email format: " + username);
+            throw new RuntimeException("Invalid email format: " + username);
         }
 
         Optional<User> user = userService.getByEmail(username);
         if (user.isEmpty()){
-            throw new UsernameNotFoundException("User not found: " + username);
+            throw new RuntimeException("User not found: " + username);
         }
         User exisitingUser = user.get();
         if (exisitingUser.isDeleted()){
-            throw new UsernameNotFoundException("User is deleted: " + username);
+            throw new RuntimeException("User is deleted: " + username);
         }
         return new UserPrincipal(exisitingUser);
     }
