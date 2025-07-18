@@ -1,5 +1,8 @@
 package com.ifan.springbootmall.security;
 
+import com.ifan.springbootmall.exception.auth.InvalidTokenFormatException;
+import com.ifan.springbootmall.exception.auth.TokenExpiredException;
+import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -47,8 +50,8 @@ class JwtServiceTest {
     @Test void generateToken_WhenEmailIsInvalid_ShouldThrowException() {
         String email = "InvalidEmail";
 
-        Exception exception = assertThrows(RuntimeException.class, () -> jwtService.generateToken(email));
-        assertEquals("Invalid email format: " + email, exception.getMessage());
+        Exception exception = assertThrows(InvalidEmailFormatException.class, () -> jwtService.generateToken(email));
+        assertEquals("Invalid email: " + email , exception.getMessage());
     }
 
     @Test
@@ -63,8 +66,8 @@ class JwtServiceTest {
     void getEmailFromToken_WhenTokenIsInvalid_ShouldThrowException() {
          String token = "invalid token";
 
-         Exception exception = assertThrows(RuntimeException.class, () -> jwtService.getEmailFromToken(token));
-         assertEquals("Invalid token format: " + token, exception.getMessage());
+         Exception exception = assertThrows(InvalidTokenFormatException.class, () -> jwtService.getEmailFromToken(token));
+         assertEquals("Invalid token format", exception.getMessage());
      }
 
     @Test
@@ -72,7 +75,7 @@ class JwtServiceTest {
          String email = "test@gmail.com";
          String token = createToken(email , -1800000L);
 
-         Exception exception = assertThrows(RuntimeException.class, () -> jwtService.getEmailFromToken(token));
+         Exception exception = assertThrows(TokenExpiredException.class, () -> jwtService.getEmailFromToken(token));
          assertEquals("Token expired", exception.getMessage());
 
     }
