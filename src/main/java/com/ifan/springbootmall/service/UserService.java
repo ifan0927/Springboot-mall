@@ -1,5 +1,10 @@
 package com.ifan.springbootmall.service;
 
+import com.ifan.springbootmall.exception.auth.InvalidPasswordException;
+import com.ifan.springbootmall.exception.common.EmailNotFoundException;
+import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
+import com.ifan.springbootmall.exception.user.NullUserException;
+import com.ifan.springbootmall.exception.user.UserNotFoundException;
 import com.ifan.springbootmall.model.PasswordHistory;
 import com.ifan.springbootmall.model.User;
 import com.ifan.springbootmall.repository.PasswordHistoryRepository;
@@ -37,10 +42,10 @@ public class UserService implements IUserService{
     @Override
     public User createUser(User user) {
         if (user == null) {
-            throw new RuntimeException("User can not be null");
+            throw new NullUserException();
         }
         if (!passwordService.isPasswordValid(user.getPassword())) {
-            throw new RuntimeException("Password not valid");
+            throw new InvalidPasswordException();
         }
         PasswordHistory passwordHistory;
         passwordHistory =  new PasswordHistory();
@@ -72,16 +77,16 @@ public class UserService implements IUserService{
                 passwordHistoryRepository.save(passwordHistory);
                 return userRepository.save(user);
             }
-            throw new RuntimeException("Password not valid");
+            throw new InvalidPasswordException();
         }
-        throw new RuntimeException("User not found");
+        throw new UserNotFoundException();
     }
 
     @Override
     public void deleteUser(Long id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isEmpty()) {
-            throw new RuntimeException("User not found");
+            throw new UserNotFoundException();
         }
         User exisitingUser = user.get();
         exisitingUser.setDeleted(true);
@@ -92,7 +97,7 @@ public class UserService implements IUserService{
     @Override
     public boolean isEmailExist(String email) {
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")){
-            throw new RuntimeException("Email not valid");
+            throw new InvalidEmailFormatException(email);
         }
         return userRepository.findByEmail(email).isPresent();
     }
@@ -100,7 +105,7 @@ public class UserService implements IUserService{
     @Override
     public boolean login(String email, String password) {
         if (!this.isEmailExist(email)){
-            throw new RuntimeException("Email not found");
+            throw new EmailNotFoundException(email);
         }
         Optional<User> user = userRepository.findByEmail(email);
         User exisitingUser = user.get();

@@ -1,6 +1,8 @@
 package com.ifan.springbootmall.service;
 
 import com.ifan.springbootmall.constant.ProductCategory;
+import com.ifan.springbootmall.exception.product.NullProductException;
+import com.ifan.springbootmall.exception.product.ProductNotFoundException;
 import com.ifan.springbootmall.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,7 +42,7 @@ public class ProductService implements IProductService{
     @Override
     public Product createProduct(Product product) {
         if(product == null){
-            throw new RuntimeException("Product can not be null");
+            throw new NullProductException();
         }
         return productRepository.save(product);
     }
@@ -53,7 +55,7 @@ public class ProductService implements IProductService{
             product.setProductId(productId);
             return productRepository.save(product);
         }
-        throw new RuntimeException("Product not found");
+        throw new ProductNotFoundException(productId);
     }
 
     @Override

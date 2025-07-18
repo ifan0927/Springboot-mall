@@ -1,5 +1,10 @@
 package com.ifan.springbootmall.service;
 
+import com.ifan.springbootmall.exception.auth.InvalidPasswordException;
+import com.ifan.springbootmall.exception.common.EmailNotFoundException;
+import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
+import com.ifan.springbootmall.exception.user.NullUserException;
+import com.ifan.springbootmall.exception.user.UserNotFoundException;
 import com.ifan.springbootmall.model.PasswordHistory;
 import com.ifan.springbootmall.model.User;
 import com.ifan.springbootmall.repository.PasswordHistoryRepository;
@@ -12,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.awt.dnd.InvalidDnDOperationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -121,9 +127,9 @@ class UserServiceTest {
 
     @Test
     void createUser_WhenUserNotExists_ShouldThrowException() {
-       RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.createUser(null));
+       RuntimeException exception = assertThrows(NullUserException.class, () -> userService.createUser(null));
 
-       assertEquals("User can not be null", exception.getMessage());
+       assertEquals("User is null", exception.getMessage());
        verify(userRepository, never()).save(any(User.class));
        verify(passwordHistoryRepository, never()).save(any(PasswordHistory.class));
     }
@@ -134,9 +140,9 @@ class UserServiceTest {
         user.setPassword("<PASSWORD>");
         when(passwordService.isPasswordValid(anyString())).thenReturn(false);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.createUser(user));
+        RuntimeException exception = assertThrows(InvalidPasswordException.class, () -> userService.createUser(user));
 
-        assertEquals("Password not valid", exception.getMessage());
+        assertEquals("Invalid password", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
         verify(passwordService).isPasswordValid(anyString());
         verify(passwordHistoryRepository, never()).save(any(PasswordHistory.class));
@@ -233,9 +239,9 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(exisitingUser));
         when(passwordService.isPasswordValid(anyString())).thenReturn(false);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.updateUser(userId, UpdateUser));
+        RuntimeException exception = assertThrows(InvalidPasswordException.class, () -> userService.updateUser(userId, UpdateUser));
 
-        assertEquals("Password not valid", exception.getMessage());
+        assertEquals("Invalid password", exception.getMessage());
         verify(userRepository).findById(userId);
         verify(passwordService).isPasswordValid(anyString());
         verify(userRepository, never()).save(any(User.class));
@@ -253,7 +259,7 @@ class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.updateUser(userId, UpdateUser));
+        RuntimeException exception = assertThrows(UserNotFoundException.class, () -> userService.updateUser(userId, UpdateUser));
 
         assertEquals("User not found", exception.getMessage());
         verify(userRepository).findById(userId);
@@ -288,9 +294,9 @@ class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.deleteUser(userId));
+        RuntimeException exception = assertThrows(UserNotFoundException.class, () -> userService.deleteUser(userId));
 
-        assertEquals("User not found", exception.getMessage());
+        assertEquals("User not found" , exception.getMessage());
         verify(userRepository).findById(userId);
         verify(userRepository, never()).save(any(User.class));
     }
@@ -338,9 +344,9 @@ class UserServiceTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(RuntimeException.class, () -> userService.login(email, "any password"));
+        Exception exception = assertThrows(EmailNotFoundException.class, () -> userService.login(email, "any password"));
 
-        assertEquals("Email not found", exception.getMessage());
+        assertEquals("Email not found: " + email, exception.getMessage());
     }
 
     @Test
@@ -369,9 +375,9 @@ class UserServiceTest {
     void isEmailExist_WhenEmailNotValid_ShouldThrowException() {
         String email = "not a valid email";
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.isEmailExist(email));
+        RuntimeException exception = assertThrows(InvalidEmailFormatException.class, () -> userService.isEmailExist(email));
 
-        assertEquals("Email not valid", exception.getMessage());
+        assertEquals("Invalid email: " + email, exception.getMessage());
         verify(userRepository, never()).findByEmail(email);
     }
 }

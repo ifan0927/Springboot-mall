@@ -1,5 +1,8 @@
 package com.ifan.springbootmall.service;
 
+import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
+import com.ifan.springbootmall.exception.user.UserIsDeletedException;
+import com.ifan.springbootmall.exception.user.UserNotFoundException;
 import com.ifan.springbootmall.model.User;
 import com.ifan.springbootmall.model.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +23,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws RuntimeException {
 
         if (!username.matches("^[A-Za-z0-9+_.-]+@(.+)$")){
-            throw new RuntimeException("Invalid email format: " + username);
+            throw new InvalidEmailFormatException(username);
         }
 
         Optional<User> user = userService.getByEmail(username);
         if (user.isEmpty()){
-            throw new RuntimeException("User not found: " + username);
+            throw new UserNotFoundException();
         }
         User exisitingUser = user.get();
         if (exisitingUser.isDeleted()){
-            throw new RuntimeException("User is deleted: " + username);
+            throw new UserIsDeletedException();
         }
         return new UserPrincipal(exisitingUser);
     }

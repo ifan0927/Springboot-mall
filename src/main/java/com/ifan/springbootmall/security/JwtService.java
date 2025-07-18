@@ -1,5 +1,8 @@
 package com.ifan.springbootmall.security;
 
+import com.ifan.springbootmall.exception.auth.InvalidTokenFormatException;
+import com.ifan.springbootmall.exception.auth.TokenExpiredException;
+import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -29,7 +32,7 @@ public class JwtService {
 
     public String generateToken(String email) {
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")){
-            throw new RuntimeException("Invalid email format: " + email);
+            throw new InvalidEmailFormatException(email);
         }
         System.out.println(secretKey);
         System.out.println(jwtExpiration);
@@ -43,13 +46,13 @@ public class JwtService {
 
     public String getEmailFromToken(String token) {
         if (!token.matches("^[A-Za-z0-9_-]{2,}(?:\\.[A-Za-z0-9_-]{2,}){2}$")) {
-            throw new RuntimeException("Invalid token format: " + token);
+            throw new InvalidTokenFormatException();
         }
         try {
             Claims claims = Jwts.parserBuilder().setSigningKey(getSignInKey()).build().parseClaimsJws(token).getBody();
             return claims.getSubject();
         } catch (ExpiredJwtException e) {
-            throw new RuntimeException("Token expired");
+            throw new TokenExpiredException();
         }
 
     }

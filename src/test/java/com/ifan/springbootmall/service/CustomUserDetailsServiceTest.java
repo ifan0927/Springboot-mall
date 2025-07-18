@@ -1,5 +1,8 @@
 package com.ifan.springbootmall.service;
 
+import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
+import com.ifan.springbootmall.exception.user.UserIsDeletedException;
+import com.ifan.springbootmall.exception.user.UserNotFoundException;
 import com.ifan.springbootmall.model.User;
 import com.ifan.springbootmall.model.UserPrincipal;
 import org.junit.jupiter.api.Test;
@@ -47,8 +50,8 @@ class CustomUserDetailsServiceTest {
 
         when(userService.getByEmail(email)).thenReturn(java.util.Optional.empty());
 
-        Exception exception = assertThrows(RuntimeException.class, () -> service.loadUserByUsername(email));
-        assertEquals("Invalid email format: " + email, exception.getMessage());
+        Exception exception = assertThrows(InvalidEmailFormatException.class, () -> service.loadUserByUsername(email));
+        assertEquals("Invalid email: " + email, exception.getMessage());
 
     }
 
@@ -58,8 +61,8 @@ class CustomUserDetailsServiceTest {
 
         when(userService.getByEmail(email)).thenReturn(java.util.Optional.empty());
 
-        Exception exception = assertThrows(RuntimeException.class, () -> service.loadUserByUsername(email));
-        assertEquals("User not found: " + email, exception.getMessage());
+        Exception exception = assertThrows(UserNotFoundException.class, () -> service.loadUserByUsername(email));
+        assertEquals("User not found", exception.getMessage());
 
         verify(userService).getByEmail(email);
     }
@@ -75,8 +78,8 @@ class CustomUserDetailsServiceTest {
 
         when(userService.getByEmail(email)).thenReturn(java.util.Optional.of(user));
 
-        Exception exception = assertThrows(RuntimeException.class, () -> service.loadUserByUsername(email));
-        assertEquals("User is deleted: " + email, exception.getMessage());
+        Exception exception = assertThrows(UserIsDeletedException.class, () -> service.loadUserByUsername(email));
+        assertEquals("User is deleted" , exception.getMessage());
 
         verify(userService).getByEmail(email);
     }

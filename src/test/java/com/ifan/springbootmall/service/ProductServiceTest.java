@@ -1,6 +1,8 @@
 package com.ifan.springbootmall.service;
 
 import com.ifan.springbootmall.constant.ProductCategory;
+import com.ifan.springbootmall.exception.product.NullProductException;
+import com.ifan.springbootmall.exception.product.ProductNotFoundException;
 import com.ifan.springbootmall.model.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -168,9 +170,9 @@ public class ProductServiceTest {
 
     @Test
     void createProduct_WhenProductNotExists_ShouldThrowException() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> productService.createProduct(null));
+        RuntimeException exception = assertThrows(NullProductException.class, () -> productService.createProduct(null));
 
-        assertEquals("Product can not be null", exception.getMessage());
+        assertEquals("Product is null", exception.getMessage());
         verify(productRepository, never()).save(any());
     }
 
@@ -213,9 +215,9 @@ public class ProductServiceTest {
         Long productId = 1L;
         when(productRepository.findById(productId)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> productService.updateProduct(productId, testProduct));
+        RuntimeException exception = assertThrows(ProductNotFoundException.class, () -> productService.updateProduct(productId, testProduct));
 
-        assertEquals("Product not found", exception.getMessage());
+        assertEquals("Product not found: " + productId, exception.getMessage());
         verify(productRepository).findById(productId);
         verify(productRepository, never()).save(any());
     }
