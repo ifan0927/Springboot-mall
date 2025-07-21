@@ -1,6 +1,7 @@
 package com.ifan.springbootmall.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -20,6 +21,7 @@ public class PasswordHistory {
     private String pwdHash;
 
     @Column(name = "created_date")
+    @CreationTimestamp
     private LocalDateTime createdDate;
 
     public Long getPwdId() {

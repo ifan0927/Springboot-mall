@@ -1,5 +1,6 @@
 package com.ifan.springbootmall.service;
 
+import com.ifan.springbootmall.exception.auth.InCorrectPasswordException;
 import com.ifan.springbootmall.exception.auth.InvalidPasswordException;
 import com.ifan.springbootmall.exception.common.EmailNotFoundException;
 import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
@@ -9,6 +10,7 @@ import com.ifan.springbootmall.model.PasswordHistory;
 import com.ifan.springbootmall.model.User;
 import com.ifan.springbootmall.repository.PasswordHistoryRepository;
 import com.ifan.springbootmall.repository.UserRepository;
+import com.ifan.springbootmall.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +40,9 @@ class UserServiceTest {
     @Mock
     private PasswordHistoryRepository passwordHistoryRepository;
 
+    @Mock
+    private JwtService jwtService;
+
 
     @InjectMocks
     private UserService userService;
@@ -50,12 +55,12 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         testUser = new User();
-        testUser.setEmail("<EMAIL>");
+        testUser.setEmail("test@gmail.com");
         testUser.setPassword("<PASSWORD>");
 
         savedUser = new User();
         savedUser.setUserId(1L);
-        savedUser.setEmail("<EMAIL>");
+        savedUser.setEmail("test@gmail.com");
         savedUser.setPassword("<PASSWORD>");
     }
 
@@ -306,36 +311,38 @@ class UserServiceTest {
     void login_WhenEmailExistsAndPasswordValid_ShouldReturnTrue() {
         String email = "test@gmail.com";
         String password = "<PASSWORD>";
+
         User exisitingUser = new User();
-        String encodedPassword = passwordEncoder.encode(password);
         exisitingUser.setUserId(1L);
         exisitingUser.setEmail(email);
-        exisitingUser.setPassword(encodedPassword);
+        exisitingUser.setPassword(passwordEncoder.encode(password));
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(exisitingUser));
+        when(jwtService.generateToken(email)).thenReturn("test token");
 
-        boolean result = userService.login(email, password);
+        String result = userService.login(email, password);
 
-        assertTrue(result);
-        verify(userRepository, atLeast(1)).findByEmail(email);
+        assertEquals("test token", result);
+        verify(userRepository).findByEmail(email);
     }
 
     @Test
-    void login_WhenEmailExistsAndPasswordNotValid_ShouldReturnFalse() {
+    void login_WhenEmailExistsAndPasswordNotCorrect_ShouldThrowException() {
         String email = "test@gmail.com";
-        String wrongPassword = "<WRONG_PASSWORD>";
-        String password = "<PASSWORD>";
+        String password = "InCorrectPassword";
+
         User exisitingUser = new User();
-        String encodedPassword = passwordEncoder.encode(password);
         exisitingUser.setUserId(1L);
         exisitingUser.setEmail(email);
-        exisitingUser.setPassword(encodedPassword);
+        exisitingUser.setPassword(passwordEncoder.encode("<PASSWORD>"));
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(exisitingUser));
-        boolean result = userService.login(email, wrongPassword);
 
-        assertFalse(result);
-        verify(userRepository, atLeast(1)).findByEmail(email);
+        Exception exception = assertThrows(InCorrectPasswordException.class, () -> userService.login(email, password));
+        assertEquals("InCorrect password", exception.getMessage());
+        verify(userRepository).findByEmail(email);
+        verify(jwtService, never()).generateToken(anyString());
+
     }
 
     @Test
@@ -347,6 +354,17 @@ class UserServiceTest {
         Exception exception = assertThrows(EmailNotFoundException.class, () -> userService.login(email, "any password"));
 
         assertEquals("Email not found: " + email, exception.getMessage());
+    }
+
+    @Test
+    void login_WhenEmailNotValid_ShouldThrowException() {
+        String email = "not a valid email";
+
+        Exception exception = assertThrows(InvalidEmailFormatException.class, () -> userService.login(email, "any password"));
+
+        verify(userRepository, never()).findByEmail(anyString());
+        verify(jwtService, never()).generateToken(anyString());
+        assertEquals("Invalid email: " + email, exception.getMessage());
     }
 
     @Test

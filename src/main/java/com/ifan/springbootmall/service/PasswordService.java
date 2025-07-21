@@ -18,7 +18,7 @@ public class PasswordService implements IPasswordService{
 
     @Override
     public boolean isPasswordValid(String password) {
-        return password.matches("^(?=.*[A-Z])(?=.*[@$!%*?&<>])[A-Za-z\\\\d@$!%*?&<>]{8,}$");
+        return password.matches("^(?=.*[A-Z])(?=.*[@$!%*?&<>])[A-Za-z1-9\\\\d@$!%*?&<>]{8,}$");
     }
 
     @Override

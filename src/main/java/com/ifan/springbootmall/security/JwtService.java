@@ -34,14 +34,14 @@ public class JwtService {
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")){
             throw new InvalidEmailFormatException(email);
         }
-        System.out.println(secretKey);
-        System.out.println(jwtExpiration);
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
+        System.out.println(token);
+        return token;
     }
 
     public String getEmailFromToken(String token) {

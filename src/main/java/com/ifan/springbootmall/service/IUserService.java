@@ -16,7 +16,7 @@ public interface IUserService {
 
     void deleteUser(Long id);
 
-    boolean login(String email, String password);
+    String login(String email, String password);
 
     boolean isEmailExist(String email);
 

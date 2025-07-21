@@ -2,6 +2,8 @@ package com.ifan.springbootmall.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -18,12 +20,20 @@ public class User {
     private String email;
 
     @Column(name = "password", nullable = false)
-    @JsonIgnore
     private String password;
 
     @Column(name = "deleted" , nullable = false)
     @JsonIgnore
     private boolean deleted = false;
+
+    @Column(name = "created_date" )
+    @CreationTimestamp
+    private LocalDateTime createdDate;
+
+    @Column(name = "last_modified_date")
+    @UpdateTimestamp
+    private LocalDateTime lastModifiedDate;
+
 
     public boolean isDeleted() {
         return deleted;
@@ -73,9 +83,4 @@ public class User {
         this.lastModifiedDate = lastModifiedDate;
     }
 
-    @Column(name = "created_date", nullable = false )
-    private LocalDateTime createdDate;
-
-    @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
-}
+    }

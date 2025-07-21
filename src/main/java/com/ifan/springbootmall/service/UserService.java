@@ -1,17 +1,21 @@
 package com.ifan.springbootmall.service;
 
+import com.ifan.springbootmall.exception.auth.InCorrectPasswordException;
 import com.ifan.springbootmall.exception.auth.InvalidPasswordException;
 import com.ifan.springbootmall.exception.common.EmailNotFoundException;
 import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
 import com.ifan.springbootmall.exception.user.NullUserException;
+import com.ifan.springbootmall.exception.user.UserExistException;
 import com.ifan.springbootmall.exception.user.UserNotFoundException;
 import com.ifan.springbootmall.model.PasswordHistory;
 import com.ifan.springbootmall.model.User;
 import com.ifan.springbootmall.repository.PasswordHistoryRepository;
 import com.ifan.springbootmall.repository.UserRepository;
+import com.ifan.springbootmall.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.util.Optional;
 
@@ -27,7 +31,12 @@ public class UserService implements IUserService{
     @Autowired
     private PasswordHistoryRepository passwordHistoryRepository;
 
+    @Autowired
+    private JwtService jwtService;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
     public Optional<User> getById(Long id) {
@@ -47,14 +56,18 @@ public class UserService implements IUserService{
         if (!passwordService.isPasswordValid(user.getPassword())) {
             throw new InvalidPasswordException();
         }
+        if (isEmailExist(user.getEmail())) {
+            throw new UserExistException();
+        }
         PasswordHistory passwordHistory;
         passwordHistory =  new PasswordHistory();
         String hashedPassword = passwordService.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
-        passwordHistory.setUserId(user.getUserId());
+        User result = userRepository.save(user);
+        passwordHistory.setUserId(result.getUserId());
         passwordHistory.setPwdHash(hashedPassword);
         passwordHistoryRepository.save(passwordHistory);
-        return userRepository.save(user);
+        return result;
     }
 
     @Override
@@ -103,13 +116,26 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public boolean login(String email, String password) {
-        if (!this.isEmailExist(email)){
-            throw new EmailNotFoundException(email);
+    public String login(String email, String password) {
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")){
+            throw new InvalidEmailFormatException(email);
         }
         Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty()){
+            throw new EmailNotFoundException(email);
+        }
         User exisitingUser = user.get();
-        return passwordEncoder.matches(password, exisitingUser.getPassword());
+        if (!passwordEncoder.matches(password, exisitingUser.getPassword())){
+            throw new InCorrectPasswordException();
+        }
+        try{
+            return jwtService.generateToken(email);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new InvalidEmailFormatException(email);
+        }
+
+
     }
 
 
