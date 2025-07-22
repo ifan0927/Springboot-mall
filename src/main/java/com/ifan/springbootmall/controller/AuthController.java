@@ -5,14 +5,13 @@ import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
 import com.ifan.springbootmall.exception.user.NullUserException;
 import com.ifan.springbootmall.exception.user.UserExistException;
 import com.ifan.springbootmall.model.User;
+import com.ifan.springbootmall.security.JwtService;
 import com.ifan.springbootmall.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +21,8 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody User user) {
@@ -56,8 +57,21 @@ public class AuthController {
     }
 
     @PostMapping("/password")
-    public ResponseEntity<?> password(@RequestBody User user) {
-        return null;
+    public ResponseEntity<?> password(@RequestBody Map<String, String> request,
+                                      @RequestHeader String authorization) {
+        String email = jwtService.getEmailFromToken(authorization);
+        User user = userService.getByEmail(email).orElseThrow(NullUserException::new);
+        user.setPassword(request.get("password"));
+
+
+        try{
+            userService.updateUser(user.getUserId(), user);
+            return ResponseEntity.ok().build();
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
 }

@@ -16,15 +16,17 @@ public class PasswordService implements IPasswordService{
     @Autowired
     private PasswordHistoryRepository passwordHistoryRepository;
 
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     @Override
     public boolean isPasswordValid(String password) {
-        return password.matches("^(?=.*[A-Z])(?=.*[@$!%*?&<>])[A-Za-z1-9\\\\d@$!%*?&<>]{8,}$");
+        return password.matches("^(?=.*[A-Z])(?=.*[@$!%*?&<>])[A-Za-z1-9\\d@$!%*?&<>]{8,}$");
+
     }
 
     @Override
     public String hashPassword(String password) {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        return encoder.encode(password);
+        return passwordEncoder.encode(password);
     }
 
 
@@ -41,12 +43,23 @@ public class PasswordService implements IPasswordService{
     @Override
     public boolean isPassWordInHistory(Long id, String password) {
         List<PasswordHistory> passwordHistories = passwordHistoryRepository.findByUserIdOrderByCreatedDateDesc(id) ;
+        System.out.println(passwordHistories.size());
         if (!passwordHistories.isEmpty()){
-            for (var i =0 ; i < 3 ; i ++){
-                if (password.equals(passwordHistories.get(i).getPwdHash())){
-                    return true;
+            if (passwordHistories.size() < 3){
+                for (PasswordHistory passwordHistory : passwordHistories) {
+                    if (passwordEncoder.matches(password, passwordHistory.getPwdHash())) {
+                        return true;
+                    }
                 }
             }
+            else{
+                for (var i =0 ; i < 3 ; i ++){
+                    if (passwordEncoder.matches(password, passwordHistories.get(i).getPwdHash())){
+                        return true;
+                    }
+                }
+            }
+
         }
         return false;
     }

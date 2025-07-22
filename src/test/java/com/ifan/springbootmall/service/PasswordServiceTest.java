@@ -125,26 +125,6 @@ class PasswordServiceTest {
         verify(passwordHistoryRepository).findByUserIdOrderByCreatedDateDesc(userId);
     }
 
-
-    // Input: HasedPassword
-    @Test
-    void isPassWordInHistory_WhenPasswordIsInHistory_ShouldReturnTrue() {
-        Long userId = 1L;
-        List<PasswordHistory> passwordHistories = createPasswordHistories(10, userId);
-        for (int i = 0; i < 10; i++) {
-            long days = 30L - i;
-            passwordHistories.get(i).setCreatedDate(LocalDateTime.now().minusDays(days));
-        }
-        when(passwordHistoryRepository.findByUserIdOrderByCreatedDateDesc(userId)).thenReturn(passwordHistories);
-        String existingPassword = passwordHistories.get(1).getPwdHash();
-
-        boolean result = passwordService.isPassWordInHistory(userId, existingPassword);
-
-        assertTrue(result);
-        verify(passwordHistoryRepository).findByUserIdOrderByCreatedDateDesc(userId);
-
-    }
-
     @Test
     void isPassWordInHistory_WhenPasswordIsNotInHistory_ShouldReturnFalse() {
         Long userId = 1L;

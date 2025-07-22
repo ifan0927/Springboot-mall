@@ -159,7 +159,7 @@ class UserServiceTest {
         User exisitingUser = new User();
         exisitingUser.setUserId(userId);
         exisitingUser.setEmail("<EMAIL>");
-        exisitingUser.setPassword("<PASSWORD>");
+        exisitingUser.setPassword("$2a$12$J9sBb1wfJ4udtWGz4qh8genzhvU1bty3M49DUzqHCXjyl2XptkW9S");
 
         User UpdateUser = new User();
         UpdateUser.setUserId(userId);

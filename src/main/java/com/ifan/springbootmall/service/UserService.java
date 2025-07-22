@@ -5,6 +5,7 @@ import com.ifan.springbootmall.exception.auth.InvalidPasswordException;
 import com.ifan.springbootmall.exception.common.EmailNotFoundException;
 import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
 import com.ifan.springbootmall.exception.user.NullUserException;
+import com.ifan.springbootmall.exception.user.PasswordInHistoryException;
 import com.ifan.springbootmall.exception.user.UserExistException;
 import com.ifan.springbootmall.exception.user.UserNotFoundException;
 import com.ifan.springbootmall.model.PasswordHistory;
@@ -50,6 +51,7 @@ public class UserService implements IUserService{
 
     @Override
     public User createUser(User user) {
+
         if (user == null) {
             throw new NullUserException();
         }
@@ -77,12 +79,17 @@ public class UserService implements IUserService{
         if (userUpdate.isPresent()) {
             user.setUserId(userId);
             User exisitingUser = userUpdate.get();
-            if (exisitingUser.getPassword().equals(user.getPassword())) {
+            if (passwordEncoder.matches(user.getPassword(), exisitingUser.getPassword())) {
+                System.out.println("password not changed");
                 return userRepository.save(user);
             }
+            System.out.println("password changed");
             if (passwordService.isPasswordValid(user.getPassword())) {
+                if (passwordService.isPassWordInHistory(userId, user.getPassword())) {
+                    throw new PasswordInHistoryException();
+                }
                 String hashedPassword = passwordService.hashPassword(user.getPassword());
-                user.setPassword(hashedPassword);
+                user.setPassword(user.getPassword());
                 PasswordHistory passwordHistory;
                 passwordHistory =  new PasswordHistory();
                 passwordHistory.setUserId(user.getUserId());

@@ -45,6 +45,9 @@ public class JwtService {
     }
 
     public String getEmailFromToken(String token) {
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
         if (!token.matches("^[A-Za-z0-9_-]{2,}(?:\\.[A-Za-z0-9_-]{2,}){2}$")) {
             throw new InvalidTokenFormatException();
         }

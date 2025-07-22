@@ -74,8 +74,9 @@ class JwtServiceTest {
     void getEmailFromToken_WhenTokenExpired_ShouldThrowException() {
          String email = "test@gmail.com";
          String token = createToken(email , -1800000L);
+         String fullToken = "Bearer " + token;
 
-         Exception exception = assertThrows(TokenExpiredException.class, () -> jwtService.getEmailFromToken(token));
+         Exception exception = assertThrows(TokenExpiredException.class, () -> jwtService.getEmailFromToken(fullToken));
          assertEquals("Token expired", exception.getMessage());
 
     }
