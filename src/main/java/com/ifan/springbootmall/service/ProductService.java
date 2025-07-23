@@ -1,6 +1,7 @@
 package com.ifan.springbootmall.service;
 
 import com.ifan.springbootmall.constant.ProductCategory;
+import com.ifan.springbootmall.exception.product.NotEnoughStockException;
 import com.ifan.springbootmall.exception.product.NullProductException;
 import com.ifan.springbootmall.exception.product.ProductNotFoundException;
 import com.ifan.springbootmall.model.Product;
@@ -62,5 +63,50 @@ public class ProductService implements IProductService{
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
+
+    @Override
+    public int getProductPrice(Long productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if(productOptional.isEmpty()){
+            throw new ProductNotFoundException(productId);
+        }
+        return productOptional.get().getPrice();
+    }
+
+    @Override
+    public boolean hasEnoughStock(Long productId, Integer quantity) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if(productOptional.isEmpty()){
+            throw new ProductNotFoundException(productId);
+        }
+        return productOptional.get().getStock() >= quantity;
+    }
+
+    @Override
+    public void decreaseStock(Long productId, Integer quantity) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if(productOptional.isEmpty()){
+            throw new ProductNotFoundException(productId);
+        }
+        Product product = productOptional.get();
+        if (product.getStock() < quantity) {
+            throw new NotEnoughStockException();
+        }
+        product.setStock(product.getStock() - quantity);
+        productRepository.save(product);
+    }
+
+    @Override
+    public void restoreStock(Long productId, Integer quantity) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if(productOptional.isEmpty()){
+            throw new ProductNotFoundException(productId);
+        }
+        Product product = productOptional.get();
+        product.setStock(product.getStock() + quantity);
+        productRepository.save(product);
+    }
+
+
 
 }

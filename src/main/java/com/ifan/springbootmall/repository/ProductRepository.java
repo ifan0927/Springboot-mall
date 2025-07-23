@@ -2,7 +2,6 @@ package com.ifan.springbootmall.repository;
 
 import com.ifan.springbootmall.constant.ProductCategory;
 import com.ifan.springbootmall.model.Product;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -14,4 +14,9 @@ public interface IProductService {
     Product createProduct(Product product);
     Product updateProduct(Long productId, Product product);
     void deleteProduct(Long id);
+    int getProductPrice(Long productId);
+    boolean hasEnoughStock(Long productId, Integer quantity);
+    void decreaseStock(Long productId, Integer quantity);
+    void restoreStock(Long productId, Integer quantity);
+
 }
