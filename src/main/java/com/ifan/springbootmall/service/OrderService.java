@@ -53,6 +53,7 @@ public class OrderService implements IOrderService{
         if (orderItems == null || orderItems.isEmpty()) {
             throw new NullOrderItemException();
         }
+
         return getOrder(order, orderItems, totalAmount);
 
     }

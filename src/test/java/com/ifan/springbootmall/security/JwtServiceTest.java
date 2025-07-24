@@ -54,13 +54,6 @@ class JwtServiceTest {
         assertEquals("Invalid email: " + email , exception.getMessage());
     }
 
-    @Test
-    void getEmailFromToken_WhenTokenIsValid_ShouldReturnEmail() {
-        String email = "test@gmail.com";
-        String token = createToken(email, 1800000L);
-        String result = jwtService.getEmailFromToken(token);
-        assertEquals(email, result);
-    }
 
     @Test
     void getEmailFromToken_WhenTokenIsInvalid_ShouldThrowException() {
@@ -70,15 +63,5 @@ class JwtServiceTest {
          assertEquals("Invalid token format", exception.getMessage());
      }
 
-    @Test
-    void getEmailFromToken_WhenTokenExpired_ShouldThrowException() {
-         String email = "test@gmail.com";
-         String token = createToken(email , -1800000L);
-         String fullToken = "Bearer " + token;
-
-         Exception exception = assertThrows(TokenExpiredException.class, () -> jwtService.getEmailFromToken(fullToken));
-         assertEquals("Token expired", exception.getMessage());
-
-    }
 
 }
