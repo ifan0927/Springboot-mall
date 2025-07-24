@@ -1,19 +1,10 @@
 package com.ifan.springbootmall.security;
 
 import com.ifan.springbootmall.exception.auth.InvalidTokenFormatException;
-import com.ifan.springbootmall.exception.auth.TokenExpiredException;
 import com.ifan.springbootmall.exception.common.InvalidEmailFormatException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-
-import java.security.Key;
-import java.util.Date;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,19 +15,7 @@ class JwtServiceTest {
     @Autowired
     private  JwtService jwtService;
 
-     private Key getSignInKey() {
-        // 測試用的固定 secret
-        byte[] keyBytes = Decoders.BASE64.decode("myJwtSecretKeyForPracticeProjectShouldBeLongEnoughToPassSomething");
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-    private String createToken(String email, Long expirationTimeMillis) {
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationTimeMillis))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
+
 
     @Test
     void generateToken_WhenEmailIsValid_ShouldReturnToken() {
